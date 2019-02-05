@@ -10,6 +10,14 @@
 * [7、跳台阶](#跳台阶)
 * [8、变态跳台阶](#变态跳台阶)
 * [9、矩形覆盖](#矩形覆盖)
+* [10、二进制中1的个数](#二进制中1的个数)
+* [11、数值的整数次方](#数值的整数次方)
+* [12、调整数组顺序使奇数位于偶数前面](#调整数组顺序使奇数位于偶数前面)
+* [13、链表中倒数第k个结点](#链表中倒数第k个结点)
+* [14、反转链表](#反转链表)
+* [15、合并两个排序的链表](#合并两个排序的链表)
+* [16、树的子结构](#树的子结构)
+* [17、二叉树的镜像](#二叉树的镜像 )
 
 
 
@@ -338,4 +346,304 @@ public class Solution {
     }
 }
 
+```
+
+## 二进制中1的个数
+
+### 题目描述
+输入一个整数，输出该数二进制表示中1的个数。其中负数用补码表示。
+
+### 题解
+#### n & (n-1)
+该位运算去除 n 的位级表示中最低的那一位。
+```
+n       : 10110100
+n-1     : 10110011
+n&(n-1) : 10110000
+```
+时间复杂度：O(M)，其中 M 表示 1 的个数。
+
+
+
+```java
+public int NumberOf1(int n) {
+    int cnt = 0;
+    while (n != 0) {
+        cnt++;
+        n &= (n - 1);
+    }
+    return cnt;
+}
+```
+
+## 数值的整数次方
+
+### 题目描述
+给定一个double类型的浮点数base和int类型的整数exponent。求base的exponent次方。
+
+### 题解
+#### 循环
+```java
+public class Solution {
+    public double Power(double base, int exponent) {
+        boolean isNegative = false;
+        if(exponent < 0){
+            isNegative = true;
+            exponent = -exponent;
+        }
+        double result = 1;
+        for(int i = 1; i <= exponent; i++){
+            result = base * result;
+        }
+        return isNegative ? 1 / result : result;
+    }
+}
+```
+
+#### 递归
+因为 (x*x)n/2 可以通过递归求解，并且每次递归 n 都减小一半，因此整个算法的时间复杂度为 O(logN)。
+```java
+public double Power(double base, int exponent) {
+    if (exponent == 0)
+        return 1;
+    if (exponent == 1)
+        return base;
+    boolean isNegative = false;
+    if (exponent < 0) {
+        exponent = -exponent;
+        isNegative = true;
+    }
+    double pow = Power(base * base, exponent / 2);
+    if (exponent % 2 != 0)
+        pow = pow * base;
+    return isNegative ? 1 / pow : pow;
+}
+```
+
+## 调整数组顺序使奇数位于偶数前面
+### 题目描述
+输入一个整数数组，实现一个函数来调整该数组中数字的顺序，使得所有的奇数位于数组的前半部分，所有的偶数位于数组的后半部分，并保证奇数和奇数，偶数和偶数之间的相对位置不变。
+### 题解
+```java
+public void reOrderArray(int[] nums) {
+    int oddCount = 0;
+    for (int val : nums)
+        if (val % 2 == 1)
+            oddCount++;
+    int[] copy = nums.clone();
+    int i = 0, j = oddCount;
+    for (int num : copy) {
+        if (num % 2 == 1)
+            nums[i++] = num;
+        else
+            nums[j++] = num;
+    }
+}
+```
+
+## 链表中倒数第k个结点
+### 题目描述
+输入一个链表，输出该链表中倒数第k个结点。
+
+### 题解
+
+#### 遍历两遍
+先遍历第一遍得出链表长度，然后得到倒数第k个为正数第n-k+1个，第二次遍历至该点输出
+```java
+public class Solution {
+    public ListNode FindKthToTail(ListNode head,int k) {
+        ListNode current = head;
+        int i = 0;
+        while (current != null){
+            current = current.next;
+            i++;
+        }
+        current = head;
+        int rank = i - k;
+        if (rank < 0)
+            return null;
+        for (int j = 0; j < rank; j++) {
+            current = current.next;
+        }
+        return current;
+    }
+}
+```
+
+#### 遍历一遍
+两个指针p1、p2，p1先动至正数第k个节点，此时p1，p2相差k个节点，p2开始动，当p1到表尾时，p2与p1相差k，即p2在倒数第k个结点
+```java
+public class Solution {
+    public ListNode FindKthToTail(ListNode head,int k) {
+        ListNode pre=null,p=null;
+        //两个指针都指向头结点
+        p=head;
+        pre=head;
+        //记录k值
+        int a=k;
+        //记录节点的个数
+        int count=0;
+        //p指针先跑，并且记录节点数，当p指针跑了k-1个节点后，pre指针开始跑，
+        //当p指针跑到最后时，pre所指指针就是倒数第k个节点
+        while(p!=null){
+            p=p.next;
+            count++;
+            if(k<1){
+                pre=pre.next;
+            }
+            k--;
+        }
+        //如果节点个数小于所求的倒数第k个节点，则返回空
+        if(count<a) return null;
+        return pre;
+            
+    }
+}
+```
+
+## 反转链表
+
+### 题目描述
+输入一个链表，反转链表后，输出新链表的表头。
+
+```java
+public class Solution {
+    public ListNode ReverseList(ListNode head) {
+        if (head == null)
+            return null;
+        ListNode listNode = new ListNode(head.val);
+        ListNode current = head.next;
+        if (current == null)
+            return listNode;
+        ListNode resulthead = null;
+        while (current != null){
+            resulthead = new ListNode(current.val);
+            resulthead.next = listNode;
+            listNode = resulthead;
+            current = current.next;
+        }
+        return resulthead;
+    }
+}
+```
+
+## 合并两个排序的链表
+### 题目描述
+输入两个单调递增的链表，输出两个链表合成后的链表，当然我们需要合成后的链表满足单调不减规则。
+
+### 题解
+
+#### 迭代
+```java
+public ListNode Merge(ListNode list1, ListNode list2) {
+    ListNode head = new ListNode(-1);
+    ListNode cur = head;
+    while (list1 != null && list2 != null) {
+        if (list1.val <= list2.val) {
+            cur.next = list1;
+            list1 = list1.next;
+        } else {
+            cur.next = list2;
+            list2 = list2.next;
+        }
+        cur = cur.next;
+    }
+    if (list1 != null)
+        cur.next = list1;
+    if (list2 != null)
+        cur.next = list2;
+    return head.next;
+}
+```
+#### 递归
+
+```java
+public ListNode Merge(ListNode list1, ListNode list2) {
+    if (list1 == null)
+        return list2;
+    if (list2 == null)
+        return list1;
+    if (list1.val <= list2.val) {
+        list1.next = Merge(list1.next, list2);
+        return list1;
+    } else {
+        list2.next = Merge(list1, list2.next);
+        return list2;
+    }
+}
+```
+
+## 树的子结构
+### 题目描述
+输入两棵二叉树A，B，判断B是不是A的子结构。（ps：我们约定空树不是任意一个树的子结构）此题要特别注意由于计算机表示小数含有误差，不能直接使用==进行double类型的等值判断，而是判断两个小数的差的绝对值是否小于某一个可忽略的数。
+### 题解
+```java
+public class Solution {
+    public boolean HasSubtree(TreeNode root1,TreeNode root2) {
+        boolean result = false;
+        
+        if(root1 != null && root2 != null) {
+        	if(Equal(root1.val, root2.val))
+        		result = DoesTree1HaveTree2(root1, root2);
+        	if(!result)
+        		result = HasSubtree(root1.left, root2);
+        	if(!result)
+        		result = HasSubtree(root1.right, root2);
+        }
+        
+        return result;
+    }
+    
+    public boolean DoesTree1HaveTree2(TreeNode root1, TreeNode root2) {
+    	if(root2 == null)
+    		return true;
+    	if(root1 == null)
+    		return false;
+    	
+    	if(!Equal(root1.val, root2.val))
+    		return false;
+    	
+    	return DoesTree1HaveTree2(root1.left, root2.left) && DoesTree1HaveTree2(root1.right, root2.right);
+    }
+    
+    public boolean Equal(double num1, double num2) {
+    	if(num1- num2 > -0.0000001 && num1 - num2 < 0.0000001)
+    		return true;
+    	return false;
+    }
+}
+```
+
+## 二叉树的镜像
+### 题目描述
+操作给定的二叉树，将其变换为源二叉树的镜像。
+### 输入描述:
+```
+二叉树的镜像定义：源二叉树 
+
+    	    8
+    	   /  \
+    	  6   10
+    	 / \  / \
+    	5  7 9 11
+    	镜像二叉树
+    	    8
+    	   /  \
+    	  10   6
+    	 / \  / \
+    	11 9 7  5
+```
+### 题解
+```java
+public class Solution {
+    public void Mirror(TreeNode root) {
+        if (root != null){
+            TreeNode temp = root.left;
+            root.left = root.right;
+            root.right = temp;
+            Mirror(root.left);
+            Mirror(root.right);
+        }
+    }
+}
 ```
