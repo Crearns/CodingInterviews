@@ -1,5 +1,5 @@
 # 《剑指offer》题解
-更新时间：2019/2/1
+更新时间：2019/2/22
 # content
 * [1、二维数组中的查找](#二维数组中的查找)
 * [2、从尾到头打印链表](#从尾到头打印链表)
@@ -18,7 +18,16 @@
 * [15、合并两个排序的链表](#合并两个排序的链表)
 * [16、树的子结构](#树的子结构)
 * [17、二叉树的镜像](#二叉树的镜像 )
-
+* [18、顺时针打印矩阵](#顺时针打印矩阵)
+* [19、包含min函数的栈](#包含min函数的栈)
+* [20、栈的压入、弹出序列](#栈的压入、弹出序列)
+* [21、从上往下打印二叉树](#从上往下打印二叉树)
+* [22、二叉搜索树的后序遍历序列](#二叉搜索树的后序遍历序列)
+* [23、二叉树中和为某一值的路径](#二叉树中和为某一值的路径)
+* [24、复杂链表的复制](#复杂链表的复制)
+* [25、二叉搜索树与双向链表](#二叉搜索树与双向链表)
+* [26、字符串的排列](#字符串的排列)
+* [27、数组中出现次数超过一半的数字](#数组中出现次数超过一半的数字)
 
 
 
@@ -647,3 +656,425 @@ public class Solution {
     }
 }
 ```
+
+## 顺时针打印矩阵
+### 题目描述
+输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每一个数字，例如，如果输入如下4 X 4矩阵： 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 则依次打印出数字1,2,3,4,8,12,16,15,14,13,9,5,6,7,11,10.
+### 题解
+
+```java
+import java.util.ArrayList;
+public class Solution {
+    public ArrayList<Integer> printMatrix(int[][] matrix) {
+    ArrayList<Integer> ret = new ArrayList<>();
+    int r1 = 0, r2 = matrix.length - 1, c1 = 0, c2 = matrix[0].length - 1;
+    while (r1 <= r2 && c1 <= c2) {
+        for (int i = c1; i <= c2; i++)
+            ret.add(matrix[r1][i]);
+        for (int i = r1 + 1; i <= r2; i++)
+            ret.add(matrix[i][c2]);
+        if (r1 != r2)
+            for (int i = c2 - 1; i >= c1; i--)
+                ret.add(matrix[r2][i]);
+        if (c1 != c2)
+            for (int i = r2 - 1; i > r1; i--)
+                ret.add(matrix[i][c1]);
+        r1++; r2--; c1++; c2--;
+    }
+    return ret;
+}
+}
+```
+
+## 包含min函数的栈
+### 题目描述
+定义栈的数据结构，请在该类型中实现一个能够得到栈中所含最小元素的min函数（时间复杂度应为O（1））。
+### 题解
+建立一个存储最小值的栈，栈顶为最小值，当弹出时判定两个栈的栈顶是否相同，如果相同则一起弹出，如果不同，只弹出数据栈。
+```java
+import java.util.Stack;
+
+public class Solution {
+    Stack<Integer> data = new Stack<>(); 
+    Stack<Integer> min = new Stack<>();
+    public void push(int node) {
+        if (!min.empty()){
+            if (node < min.peek())
+                min.push(node);
+        }
+        else {
+            min.push(node);
+        }
+        data.push(node);
+    }
+
+    public void pop() {
+        if (data.peek() == min.peek()){
+            min.pop();
+        }
+        data.pop();
+    }
+
+    public int top() {
+        return data.peek();
+    }
+
+    public int min() {
+        return min.peek();
+    }
+}
+```
+
+## 栈的压入、弹出序列
+### 题目描述
+输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否可能为该栈的弹出顺序。假设压入栈的所有数字均不相等。例如序列1,2,3,4,5是某栈的压入顺序，序列4,5,3,2,1是该压栈序列对应的一个弹出序列，但4,3,5,1,2就不可能是该压栈序列的弹出序列。（注意：这两个序列的长度是相等的）
+### 题解
+```java
+import java.util.Stack;
+public class Solution {
+    public boolean IsPopOrder(int [] pushA,int [] popA) {
+        if(pushA.length == 0 || popA.length == 0)
+            return false;
+        Stack<Integer> s = new Stack<Integer>();
+        //用于标识弹出序列的位置
+        int popIndex = 0;
+        for(int i = 0; i< pushA.length;i++){
+            s.push(pushA[i]);
+            //如果栈不为空，且栈顶元素等于弹出序列
+            while(!s.empty() &&s.peek() == popA[popIndex]){
+                //出栈
+                s.pop();
+                //弹出序列向后一位
+                popIndex++;
+            }
+        }
+        return s.empty();
+    }
+}
+```
+
+## 从上往下打印二叉树
+### 题目描述
+从上往下打印出二叉树的每个节点，同层节点从左至右打印。
+### 题解
+使用队列结构，进行广度优先遍历
+```java
+import java.util.ArrayList;
+/**
+public class TreeNode {
+    int val = 0;
+    TreeNode left = null;
+    TreeNode right = null;
+
+    public TreeNode(int val) {
+        this.val = val;
+
+    }
+
+}
+*/
+import java.util.ArrayList;
+import java.util.LinkedList;
+
+public class Solution {
+    public ArrayList<Integer> PrintFromTopToBottom(TreeNode root) {
+        LinkedList<TreeNode> queue = new LinkedList<>();
+        ArrayList<Integer> result = new ArrayList<>();
+        if (root == null)
+            return result;
+        queue.addLast(root);
+        TreeNode temp;
+        while (!queue.isEmpty()){
+           temp = queue.removeFirst();
+           result.add(temp.val);
+           if (temp.left != null)
+               queue.addLast(temp.left);
+           if (temp.right != null)
+               queue.addLast(temp.right);
+        }
+        return result;
+    }
+}
+```
+
+## 二叉搜索树的后序遍历序列
+### 题目描述
+输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历的结果。如果是则输出Yes,否则输出No。假设输入的数组的任意两个数字都互不相同。
+### 题解
+先以以下二叉树为例，其输入数组为{5, 7, 6, 9, 11, 10, 8}。
+```
+    8
+   /  \
+  6    10
+ / \  / \
+5  7 9   11
+
+```
+我们可以发现，数组的最后一个数字8就是二叉树的根节点，然后从数组开始进行遍历，凡是比8小的都属于根节点的左子树，其余的就是根节点的右子树，即{5, 7, 6, /9, 11, 10,/ 8}。我们在看看根节点的左子树，同样最后一个数字6是左子树的根节点，而5、7分别属于左子树根节点的左右子树。
+
+再看看另一个例子：{7, 4, 6, 5}，由以上分析的规律可以发现，5为二叉树的根节点，而7、4、6都比5大，说明此二叉树没有左子树，而在右子树{7, 4, 6}中，7比6大，说明7在根节点的右子树中，而4却又比6小，这有违二叉树的定义，说明此数组不属于任何一个二叉树。
+
+因此，我们可以使用递归来解决这个问题，先找到二叉树的根节点，再基于此根节点将数组拆分成左右子树，然后对左右子树分别进行递归。
+
+```java
+public class Solution {
+    public boolean VerifySquenceOfBST(int [] sequence) {
+        if(sequence.length==0)
+            return false;
+        if(sequence.length==1)
+            return true;
+        return ju(sequence, 0, sequence.length-1);
+         
+    }
+     
+    public boolean ju(int[] a,int star,int root){
+        if(star>=root)
+            return true;
+        int i = root;
+        //从后面开始找
+        while(i>star&&a[i-1]>a[root])
+            i--;//找到比根小的坐标
+        //从前面开始找 star到i-1应该比根小
+        for(int j = star;j<i-1;j++)
+            if(a[j]>a[root])
+                return false;;
+        return ju(a,star,i-1)&&ju(a, i, root-1);
+    }
+}
+```
+
+## 二叉树中和为某一值的路径
+### 题目描述
+输入一颗二叉树的跟节点和一个整数，打印出二叉树中结点值的和为输入整数的所有路径。路径定义为从树的根结点开始往下一直到叶结点所经过的结点形成一条路径。(注意: 在返回值的list中，数组长度大的数组靠前)
+### 题解
+此题运用深度优先搜索和回溯的思想。从左开始向下深度遍历，遇到叶节点之后，判断其值是否等于target，如果相等则将此路径加入到所有路径的列表中。每次回退的时候，都要将路径最后一个节点删除。
+```java
+import java.util.ArrayList;
+/**
+public class TreeNode {
+    int val = 0;
+    TreeNode left = null;
+    TreeNode right = null;
+
+    public TreeNode(int val) {
+        this.val = val;
+
+    }
+
+}
+*/
+public class Solution {
+    private ArrayList<ArrayList<Integer>> listAll = new ArrayList<ArrayList<Integer>>();
+    private ArrayList<Integer> list = new ArrayList<Integer>();
+    public ArrayList<ArrayList<Integer>> FindPath(TreeNode root,int target) {
+        if(root == null) return listAll;
+        list.add(root.val);
+        target -= root.val;
+        if(target == 0 && root.left == null && root.right == null)
+            listAll.add(new ArrayList<Integer>(list));
+        FindPath(root.left, target);
+        FindPath(root.right, target);
+        list.remove(list.size()-1);
+        return listAll;
+    }
+}
+```
+
+## 复杂链表的复制
+### 题目描述
+输入一个复杂链表（每个节点中有节点值，以及两个指针，一个指向下一个节点，另一个特殊指针指向任意一个节点），返回结果为复制后复杂链表的head。（注意，输出结果中请不要返回参数中的节点引用，否则判题程序会直接返回空）
+### 题解
+此题需要注意的是，不能单独新建链表一个个复制节点，因为无法确定复杂指针的位置。此题应该分三步：1、复制每个结点，如复制结点A得到A1，将结点A1插到结点A后面；2、重新遍历链表，复制老结点的随机指针给新结点，如A1.random = A.random.next;3、拆分链表，将链表拆分为原链表和复制后的链表
+```java
+/*
+public class RandomListNode {
+    int label;
+    RandomListNode next = null;
+    RandomListNode random = null;
+
+    RandomListNode(int label) {
+        this.label = label;
+    }
+}
+*/
+public class Solution {
+   public RandomListNode Clone(RandomListNode pHead) {
+        if(pHead == null) {
+            return null;
+        }
+         
+        RandomListNode currentNode = pHead;
+        //1、复制每个结点，如复制结点A得到A1，将结点A1插到结点A后面；
+        while(currentNode != null){
+            RandomListNode cloneNode = new RandomListNode(currentNode.label);
+            RandomListNode nextNode = currentNode.next;
+            currentNode.next = cloneNode;
+            cloneNode.next = nextNode;
+            currentNode = nextNode;
+        }
+         
+        currentNode = pHead;
+        //2、重新遍历链表，复制老结点的随机指针给新结点，如A1.random = A.random.next;
+        while(currentNode != null) {
+            currentNode.next.random = currentNode.random==null?null:currentNode.random.next;
+            currentNode = currentNode.next.next;
+        }
+         
+        //3、拆分链表，将链表拆分为原链表和复制后的链表
+        currentNode = pHead;
+        RandomListNode pCloneHead = pHead.next;
+        while(currentNode != null) {
+            RandomListNode cloneNode = currentNode.next;
+            currentNode.next = cloneNode.next;
+            cloneNode.next = cloneNode.next==null?null:cloneNode.next.next;
+            currentNode = currentNode.next;
+        }
+         
+        return pCloneHead;
+    }
+}
+```
+
+## 二叉搜索树与双向链表
+### 题目描述
+输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的双向链表。要求不能创建任何新的结点，只能调整树中结点指针的指向。
+### 题解
+```java
+/**
+public class TreeNode {
+    int val = 0;
+    TreeNode left = null;
+    TreeNode right = null;
+
+    public TreeNode(int val) {
+        this.val = val;
+
+    }
+
+}
+*/
+public class Solution {
+   public TreeNode Convert(TreeNode root) {
+        if(root == null)
+            return null;
+        if(root.left == null && root.right == null)
+            return root;
+        TreeNode left = Convert(root.left);
+        TreeNode p = left;
+        while(p != null && p.right != null) {
+            p = p.right;
+        }
+        if(left != null) {
+            root.left = p;
+            p.right = root;
+        }
+        TreeNode right = Convert(root.right);
+        if(right != null) {
+            root.right = right;
+            right.left = root;
+        }
+        return left != null ? left : root;
+    }
+}
+```
+
+
+## 字符串的排列
+### 题目描述
+输入一个字符串,按字典序打印出该字符串中字符的所有排列。例如输入字符串abc,则打印出由字符a,b,c所能排列出来的所有字符串abc,acb,bac,bca,cab和cba。
+### 输入描述:
+输入一个字符串,长度不超过9(可能有字符重复),字符只包括大小写字母。
+### 题解
+```java
+import java.util.ArrayList;
+import java.util.Collections;
+public class Solution {
+    public ArrayList<String> Permutation(String str) {
+        ArrayList<String> list = new ArrayList<>();
+        if(str == null || str.length() == 0)
+            return list;
+        Permutation(str.toCharArray(), 0, list);
+        Collections.sort(list);
+        return list;
+    }
+
+    public void Permutation(char[] c, int i, ArrayList<String> list) {
+        if(i == c.length) {
+            String str = String.valueOf(c);
+            if(!list.contains(str))
+                list.add(String.valueOf(c));
+            return;
+        } else {
+            for(int j = i; j < c.length; j++) {
+                swap(c, i, j);
+                Permutation(c, i+1, list);
+                swap(c, i, j);
+            }
+        }
+    }
+
+    public void swap(char[] c, int i, int j){
+        char temp;
+        temp = c[i];
+        c[i] = c[j];
+        c[j] = temp;
+    }
+}
+```
+
+## 数组中出现次数超过一半的数字
+### 题目描述
+数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。例如输入一个长度为9的数组{1,2,3,2,2,2,5,4,2}。由于数字2在数组中出现了5次，超过数组长度的一半，因此输出2。如果不存在则输出0。
+### 题解
+#### 使用HashMap
+```java
+import java.util.HashMap;
+
+public class Solution {
+    public int MoreThanHalfNum_Solution(int [] array) {
+        HashMap<Integer, Integer> data = new HashMap<>();
+        for (int i :
+                array) {
+            if (data.keySet().contains(i)){
+                int temp = data.get(i);
+                data.put(i, temp+1);
+            }
+            else {
+                data.put(i, 1);
+            }
+        }
+        for (int i :
+                data.keySet()) {
+            if (data.get(i) > array.length / 2)
+                return i;
+        }
+        return 0;
+    }
+}
+```
+
+#### 排序法
+数组排序后，如果符合条件的数存在，则一定是数组中间那个数。（比如：1，2，2，2，3；或2，2，2，3，4；或2，3，4，4，4等等）
+```java
+import java.util.Arrays;
+ 
+public class Solution {
+    public int MoreThanHalfNum_Solution(int [] array) {
+        Arrays.sort(array);
+        int count=0;
+         
+        for(int i=0;i<array.length;i++){
+            if(array[i]==array[array.length/2]){
+                count++;
+            }
+        }
+        if(count>array.length/2){
+            return array[array.length/2];
+        }else{
+            return 0;
+        }
+         
+    }
+}
+```
+
