@@ -44,7 +44,9 @@
 * [41、和为S的两个数字](#和为S的两个数字)
 * [42、左旋转字符串](#左旋转字符串)
 * [43、翻转单词顺序列](#翻转单词顺序列)
-
+* [44、扑克牌顺子](#扑克牌顺子)
+* [45、孩子们的游戏(圆圈中最后剩下的数)](#孩子们的游戏(圆圈中最后剩下的数))
+* [46、求1+2+3+...+n](#求1+2+3+...+n)
 
 # 正文
 ## 二维数组中的查找
@@ -1712,6 +1714,86 @@ public class Solution {
             i++;
             j--;
         }
+    }
+}
+```
+## 扑克牌顺子
+### 题目描述
+LL今天心情特别好,因为他去买了一副扑克牌,发现里面居然有2个大王,2个小王(一副牌原本是54张^_^)...他随机从中抽出了5张牌,想测测自己的手气,看看能不能抽到顺子,如果抽到的话,他决定去买体育彩票,嘿嘿！！“红心A,黑桃3,小王,大王,方片5”,“Oh My God!”不是顺子.....LL不高兴了,他想了想,决定大\小 王可以看成任何数字,并且A看作1,J为11,Q为12,K为13。上面的5张牌就可以变成“1,2,3,4,5”(大小王分别看作2和4),“So Lucky!”。LL决定去买体育彩票啦。 现在,要求你使用这幅牌模拟上面的过程,然后告诉我们LL的运气如何， 如果牌能组成顺子就输出true，否则就输出false。为了方便起见,你可以认为大小王是0。
+### 题解
+```java
+import java.util.Arrays;
+public class Solution {
+    public static boolean isContinuous(int [] numbers) {
+        if (numbers == null)
+            return false;
+        if (numbers.length == 0)
+            return false;
+        Arrays.sort(numbers);
+        int zerocount = 0;
+
+        for (int i :
+                numbers) {
+            if (i == 0)
+                zerocount++;
+        }
+        for (int i = zerocount; i < numbers.length-1; i++) {
+            if (numbers[i] == numbers[i+1]) return false;
+            if (numbers[i] != numbers[i+1]-1){
+                if (zerocount >= numbers[i+1]-numbers[i]-1)
+                    zerocount -= (numbers[i+1]-numbers[i]-1);
+                else
+                    return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+## 孩子们的游戏(圆圈中最后剩下的数)
+### 题目描述
+每年六一儿童节,牛客都会准备一些小礼物去看望孤儿院的小朋友,今年亦是如此。HF作为牛客的资深元老,自然也准备了一些小游戏。其中,有个游戏是这样的:首先,让小朋友们围成一个大圈。然后,他随机指定一个数m,让编号为0的小朋友开始报数。每次喊到m-1的那个小朋友要出列唱首歌,然后可以在礼品箱中任意的挑选礼物,并且不再回到圈中,从他的下一个小朋友开始,继续0...m-1报数....这样下去....直到剩下最后一个小朋友,可以不用表演,并且拿到牛客名贵的“名侦探柯南”典藏版(名额有限哦!!^_^)。请你试着想下,哪个小朋友会得到这份礼品呢？(注：小朋友的编号是从0到n-1)
+### 题解
+```java
+import java.util.LinkedList;
+public class Solution {
+    public int LastRemaining_Solution(int n, int m) {
+        LinkedList<Integer> list = new LinkedList<Integer>();
+        for (int i = 0; i < n; i ++) {
+            list.add(i);
+        }
+
+        int bt = 0;
+        while (list.size() > 1) {
+            bt = (bt + m - 1) % list.size();
+            list.remove(bt);
+        }
+
+        return list.size() == 1 ? list.get(0) : -1;
+    }
+}
+```
+## 求1+2+3+...+n
+### 题目描述
+求1+2+3+...+n，要求不能使用乘除法、for、while、if、else、switch、case等关键字及条件判断语句（A?B:C）。
+### 题解
+```java
+public class Solution {
+    public static int Sum_Solution(int n) {
+        if (n == 0)
+            return n;
+        int a = n + 1;
+        int m = 0;
+        int mult = 0;
+        while (a > 0){
+            if (a % 2 != 0){
+                mult += (n << m);
+            }
+            a = a >> 1;
+            m++;
+        }
+        return mult >> 1;
     }
 }
 ```
